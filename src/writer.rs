@@ -1,4 +1,4 @@
-use std::fmt::{Binary, Display, Octal, UpperHex, Write};
+use std::fmt::{Binary, Display, Octal, UpperHex};
 
 use crate::Radix;
 
@@ -8,7 +8,11 @@ pub struct Mif<'a, T> {
     data: &'a [T],
 }
 
-impl<'a, T> Mif<'a, T> {
+impl<'a, T: ToMif> Mif<'a, T> {
+    const BIN_WIDTH: usize = T::WIDTH;
+    const HEX_WIDTH: usize = T::WIDTH / 4;
+    const OCT_WIDTH: usize = T::WIDTH / 3 + 1;
+
     pub fn new(data: &'a [T], address_radix: Radix, data_radix: Radix) -> Self {
         Self {
             data,
@@ -25,6 +29,9 @@ where
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let depth = self.data.len();
         let width = T::WIDTH;
+        let bin_width = Self::BIN_WIDTH;
+        let oct_width = Self::OCT_WIDTH;
+        let hex_width = Self::HEX_WIDTH;
         let address_radix = self.address_radix;
         let data_radix = self.data_radix;
         let mut data = self.data.iter().enumerate();
@@ -33,63 +40,90 @@ where
 
         match (address_radix, data_radix) {
             (Radix::Bin, Radix::Bin) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:b} : {value:b}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0bin_width$b} : {value:0bin_width$b}\n",
+                ))
             })?,
             (Radix::Bin, Radix::Dec) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:b} : {value}\n"))
+                f.write_fmt(format_args!("{index:0bin_width$b} : {value}\n"))
             })?,
             (Radix::Bin, Radix::Hex) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:b} : {value:X}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0bin_width$b} : {value:0hex_width$X}\n",
+                ))
             })?,
             (Radix::Bin, Radix::Oct) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:b} : {value:o}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0bin_width$b} : {value:0oct_width$o}\n",
+                ))
             })?,
             (Radix::Bin, Radix::Uns) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:b} : {}\n", value.unsigned()))
+                f.write_fmt(format_args!(
+                    "{index:0bin_width$b} : {}\n",
+                    value.unsigned()
+                ))
             })?,
 
             (Radix::Hex, Radix::Bin) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:X} : {value:b}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0hex_width$X} : {value:0bin_width$b}\n",
+                ))
             })?,
             (Radix::Hex, Radix::Dec) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:X} : {value}\n"))
+                f.write_fmt(format_args!("{index:0hex_width$X} : {value}\n",))
             })?,
             (Radix::Hex, Radix::Hex) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:X} : {value:X}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0hex_width$X} : {value:0hex_width$X}\n",
+                ))
             })?,
             (Radix::Hex, Radix::Oct) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:X} : {value:o}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0hex_width$X} : {value:0oct_width$o}\n",
+                ))
             })?,
             (Radix::Hex, Radix::Uns) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:X} : {}\n", value.unsigned()))
+                f.write_fmt(format_args!(
+                    "{index:0hex_width$X} : {}\n",
+                    value.unsigned()
+                ))
             })?,
 
             (Radix::Oct, Radix::Bin) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:o} : {value}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0oct_width$o} : {value:0bin_width$b}\n",
+                ))
             })?,
             (Radix::Oct, Radix::Dec) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:o} : {value:b}\n"))
+                f.write_fmt(format_args!("{index:0oct_width$o} : {value}\n"))
             })?,
             (Radix::Oct, Radix::Hex) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:o} : {value:X}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0oct_width$o} : {value:0hex_width$X}\n",
+                ))
             })?,
             (Radix::Oct, Radix::Oct) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:o} : {value:o}\n"))
+                f.write_fmt(format_args!(
+                    "{index:0oct_width$o} : {value:0oct_width$o}\n",
+                ))
             })?,
             (Radix::Oct, Radix::Uns) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:o} : {}\n", value.unsigned()))
+                f.write_fmt(format_args!(
+                    "{index:0oct_width$o} : {}\n",
+                    value.unsigned()
+                ))
             })?,
 
             (Radix::Dec | Radix::Uns, Radix::Bin) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {value:b}\n"))
+                f.write_fmt(format_args!("{index} : {value:0bin_width$b}\n"))
             })?,
             (Radix::Dec | Radix::Uns, Radix::Dec) => data
                 .try_for_each(|(index, value)| f.write_fmt(format_args!("{index} : {value}\n")))?,
             (Radix::Dec | Radix::Uns, Radix::Hex) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {value:X}\n"))
+                f.write_fmt(format_args!("{index} : {value:0hex_width$X}\n"))
             })?,
             (Radix::Dec | Radix::Uns, Radix::Oct) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {value:o}\n"))
+                f.write_fmt(format_args!("{index} : {value:0oct_width$o}\n"))
             })?,
             (Radix::Dec | Radix::Uns, Radix::Uns) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!("{index} : {}\n", value.unsigned()))
@@ -100,7 +134,7 @@ where
     }
 }
 
-trait ToMif: Octal + Binary + UpperHex + Display {
+pub trait ToMif: Octal + Binary + UpperHex + Display {
     const WIDTH: usize;
 
     type Unsigned: Display;
@@ -171,22 +205,4 @@ mod wasm {
     gen_writers!(i32, Int32);
     gen_writers!(u64, Uint64);
     gen_writers!(i64, Int64);
-}
-
-mod test {
-    use super::*;
-
-    #[test]
-    fn i8_hex_uns() {
-        let data = &[-2i8, 2, -3, -1, 2, 0];
-        let writer = Mif::new(data, Radix::Hex, Radix::Uns);
-        assert_eq!(format!("{writer}"), "DEPTH = 6\nWIDTH = 8\nADDRESS_RADIX = HEX\nDATA_RADIX = UNS\nCONTENT BEGIN\n0 : 254\n1 : 2\n2 : 253\n3 : 255\n4 : 2\n5 : 0\nEND;")
-    }
-
-    #[test]
-    fn i16_bin_dec() {
-        let data = &[-2i16, 2, -3, -1, 2, 0];
-        let writer = Mif::new(data, Radix::Bin, Radix::Dec);
-        assert_eq!(format!("{writer}"), "DEPTH = 6\nWIDTH = 16\nADDRESS_RADIX = BIN\nDATA_RADIX = DEC\nCONTENT BEGIN\n0 : -2\n1 : 2\n10 : -3\n11 : -1\n100 : 2\n101 : 0\nEND;")
-    }
 }

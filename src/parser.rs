@@ -1,6 +1,6 @@
 use nom::{
     branch::alt,
-    bytes::complete::{is_a, is_not, tag, take_until, take_while},
+    bytes::complete::{is_a, is_not, tag, take_while},
     character::complete::{char, space1},
     combinator::map,
     multi::{many0, many0_count, separated_list1},
