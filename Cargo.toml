@@ -6,7 +6,12 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+f16 = []
+f128 = []
+
 [dependencies]
+const_format = "0.2.32"
 nom = "7.1.3"
 paste = "1.0.15"
 wasm-bindgen = { version = "0.2.92" }
