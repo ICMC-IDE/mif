@@ -36,97 +36,97 @@ where
         let data_radix = self.data_radix;
         let mut data = self.data.iter().enumerate();
 
-        f.write_fmt(format_args!("DEPTH = {depth}\nWIDTH = {width}\nADDRESS_RADIX = {address_radix}\nDATA_RADIX = {data_radix}\nCONTENT BEGIN\n"))?;
+        f.write_fmt(format_args!("DEPTH = {depth};\nWIDTH = {width};\nADDRESS_RADIX = {address_radix};\nDATA_RADIX = {data_radix};\nCONTENT BEGIN\n"))?;
 
         match (address_radix, data_radix) {
             (Radix::Bin, Radix::Bin) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0bin_width$b} : {value:0bin_width$b}\n",
+                    "{index:0bin_width$b} : {value:0bin_width$b};\n",
                 ))
             })?,
             (Radix::Bin, Radix::Dec) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:0bin_width$b} : {value}\n"))
+                f.write_fmt(format_args!("{index:0bin_width$b} : {value};\n"))
             })?,
             (Radix::Bin, Radix::Hex) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0bin_width$b} : {value:0hex_width$X}\n",
+                    "{index:0bin_width$b} : {value:0hex_width$X};\n",
                 ))
             })?,
             (Radix::Bin, Radix::Oct) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0bin_width$b} : {value:0oct_width$o}\n",
+                    "{index:0bin_width$b} : {value:0oct_width$o};\n",
                 ))
             })?,
             (Radix::Bin, Radix::Uns) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0bin_width$b} : {}\n",
+                    "{index:0bin_width$b} : {};\n",
                     value.unsigned()
                 ))
             })?,
 
             (Radix::Hex, Radix::Bin) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0hex_width$X} : {value:0bin_width$b}\n",
+                    "{index:0hex_width$X} : {value:0bin_width$b};\n",
                 ))
             })?,
             (Radix::Hex, Radix::Dec) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:0hex_width$X} : {value}\n",))
+                f.write_fmt(format_args!("{index:0hex_width$X} : {value};\n",))
             })?,
             (Radix::Hex, Radix::Hex) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0hex_width$X} : {value:0hex_width$X}\n",
+                    "{index:0hex_width$X} : {value:0hex_width$X};\n",
                 ))
             })?,
             (Radix::Hex, Radix::Oct) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0hex_width$X} : {value:0oct_width$o}\n",
+                    "{index:0hex_width$X} : {value:0oct_width$o};\n",
                 ))
             })?,
             (Radix::Hex, Radix::Uns) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0hex_width$X} : {}\n",
+                    "{index:0hex_width$X} : {};\n",
                     value.unsigned()
                 ))
             })?,
 
             (Radix::Oct, Radix::Bin) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0oct_width$o} : {value:0bin_width$b}\n",
+                    "{index:0oct_width$o} : {value:0bin_width$b};\n",
                 ))
             })?,
             (Radix::Oct, Radix::Dec) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index:0oct_width$o} : {value}\n"))
+                f.write_fmt(format_args!("{index:0oct_width$o} : {value};\n"))
             })?,
             (Radix::Oct, Radix::Hex) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0oct_width$o} : {value:0hex_width$X}\n",
+                    "{index:0oct_width$o} : {value:0hex_width$X};\n",
                 ))
             })?,
             (Radix::Oct, Radix::Oct) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0oct_width$o} : {value:0oct_width$o}\n",
+                    "{index:0oct_width$o} : {value:0oct_width$o};\n",
                 ))
             })?,
             (Radix::Oct, Radix::Uns) => data.try_for_each(|(index, value)| {
                 f.write_fmt(format_args!(
-                    "{index:0oct_width$o} : {}\n",
+                    "{index:0oct_width$o} : {};\n",
                     value.unsigned()
                 ))
             })?,
 
             (Radix::Dec | Radix::Uns, Radix::Bin) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {value:0bin_width$b}\n"))
+                f.write_fmt(format_args!("{index} : {value:0bin_width$b};\n"))
             })?,
             (Radix::Dec | Radix::Uns, Radix::Dec) => data
-                .try_for_each(|(index, value)| f.write_fmt(format_args!("{index} : {value}\n")))?,
+                .try_for_each(|(index, value)| f.write_fmt(format_args!("{index} : {value};\n")))?,
             (Radix::Dec | Radix::Uns, Radix::Hex) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {value:0hex_width$X}\n"))
+                f.write_fmt(format_args!("{index} : {value:0hex_width$X};\n"))
             })?,
             (Radix::Dec | Radix::Uns, Radix::Oct) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {value:0oct_width$o}\n"))
+                f.write_fmt(format_args!("{index} : {value:0oct_width$o};\n"))
             })?,
             (Radix::Dec | Radix::Uns, Radix::Uns) => data.try_for_each(|(index, value)| {
-                f.write_fmt(format_args!("{index} : {}\n", value.unsigned()))
+                f.write_fmt(format_args!("{index} : {};\n", value.unsigned()))
             })?,
         }
 
